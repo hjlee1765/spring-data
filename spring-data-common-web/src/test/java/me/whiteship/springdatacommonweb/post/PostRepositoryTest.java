@@ -4,12 +4,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.JpaSort;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -86,5 +90,70 @@ public class PostRepositoryTest {
         //업데이트 되는 시점은 이 때. 하이버네이트가 find 할 때 객체상태변화가 되어 필요하다고 생각되어 싱크를 한다.
         List<Post> all = postRepository.findAll();
         assertThat(all.size()).isEqualTo(1);
+    }
+
+    //스프링 데이터 JPA 3. JPA 쿼리 메소드
+    @Test
+    public void findByTitleStartsWith(){
+        Post post = new Post();
+        post.setTitle("Spring Data Jpa");
+        Post savedPost = postRepository.save(post);
+
+        List<Post> all = postRepository.findByTitleStartingWith("Spring");
+        assertThat(all.size()).isEqualTo(1);
+    }
+
+    private Post savePost(){
+        Post post = new Post();
+        post.setTitle("Spring");
+        return postRepository.save(post);
+    }
+    @Test
+    public void findByTitle() {
+        savePost();
+        List<Post> all = postRepository.findByTitle("Spring");
+        assertThat(all.size()).isEqualTo(1);
+
+        //스프링 데이터 JPA 4. Sort
+        //Sort 에 들어가는 문자열은 프로퍼티 or Alias 여야 한다.
+        //title 은 Post 엔티티의 프로퍼티.
+        List<Post> all2 = postRepository
+                .findByTitleQueryAnnotaion("Spring", Sort.by("title"));
+        assertThat(all2.size()).isEqualTo(1);
+
+        //JpaSort.unsafe 를 사용해서 Sort 에 들어가는 문자열을 함수로 변경 가능하다.
+        List<Post> all3 = postRepository
+                .findByTitleQueryAnnotaion("Spring", JpaSort.unsafe("LENGTH(title)"));
+        assertThat(all3.size()).isEqualTo(1);
+    }
+
+    //스프링 데이터 JPA 6. Update 쿼리.
+    @Test
+    public void updateTitle(){
+        Post spring = savePost();
+
+        String hibernate = "hibernate";
+        int updateCount = postRepository.updateTitle(hibernate, spring.getId());
+        assertThat(updateCount).isEqualTo(1);
+
+        //업데이트 쓰면 단점. -> persistent 상태로 관리되면 객체가 캐싱되어있어서 에러 발생 할 수 있음.
+
+        //Post spring 객체는 한 트랜잭션 내에서, Persistent 캐시가 유지가 된다.
+        //Persistent 상태에 있는 spring 객체가 있기에 db 에 findById 를 하지 않고 캐싱된 spring 객체를 그대로 가져온다.
+        //해결법 -> 업데이트 쿼리 후에, persistence context 를 클리어해준다.
+        //         @Modifying(clearAutomatically = true)
+        Optional<Post> byId = postRepository.findById(spring.getId());
+        assertThat(byId.get().getTitle()).isEqualTo(hibernate);
+    }
+
+    //그럼 제대로 된 update 쿼리를 만들어 보자.
+    @Test
+    public void realUpdateTitle(){
+        Post spring = savePost();
+        spring.setTitle("hibernate");
+
+        //find 하기 전에 db 에 sync 를 맞춘다. (하이버네이트가)
+        Optional<Post> byId = postRepository.findById(spring.getId());
+        assertThat(byId.get().getTitle()).isEqualTo("hibernate");
     }
 }
