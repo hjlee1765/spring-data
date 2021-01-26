@@ -15,6 +15,7 @@ public class SimpleMyRepositroy<T,ID extends Serializable> extends SimpleJpaRepo
 
     private EntityManager entityManager;
 
+    //SimpleJpaRepository 를 상속받고 있어서, super 호출 할 때, 두 인자를 넘겨야함.
     //빈을 주입받아서 전달해줘야함.
     public SimpleMyRepositroy(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
         super(entityInformation, entityManager);
