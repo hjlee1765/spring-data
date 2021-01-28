@@ -27,7 +27,7 @@ public class Study {
     //Study 안에 Account 를 가지고 있는 경우 = Study 가 주인 ->  foreign key 로 관리된다.
     //@ManyToOne 의 끝 부분이 "One" 이면 프로퍼티도 리스트가 아니라 단건.
 
-    //study 는 테이블에 컬럼으로 _id 를 붙여서 foreign key 를 생성한다. (owner 의 키)
+    //study 는 테이블에 컬럼으로 "프로퍼티 명(owner) + _id" 를 붙여서 foreign key 를 생성한다. (owner 의 키)
     @ManyToOne
     private Account owner;
 */

@@ -12,6 +12,11 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+// 스프링 데이터 Common 10. QueryDSL 연동
+
+// Query DSL : 쿼리메소드로 적당히가 안되는 놈들을 C# 의 링큐와 비슷한 방식으로 조회하자.
+//             ex) findByFirstNameIngoreCaseAndLastNameStartsWithIgnoreCase(String firstName, String lastName)
+
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class AccountRepositoryTest {
