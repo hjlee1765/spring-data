@@ -44,7 +44,7 @@ public class PostRepositoryTest {
     public void save(){
 
         //Transient 상태 : 새로 만들어진 객체. 하이버네이트와 db는 이 객체를 모른다. id 가 없다.
-        //Persistent 상태 : Persist 컨텍스트가 관리하는 상태. -> 하이버네이트가 똑똑하게 적절하게 db와 싱크함.
+        //Persistent 상태 : Persistence context 가 관리하는 상태. -> 하이버네이트가 똑똑하게 적절하게 db와 싱크함.
         //Detached 상태 : 한 번이라도 db에 persist 가 되었던 객체. 이 객체는 id 가 있을 수도 있고 없을 수도 있다.
 
         //Transient 인지 Detached 인지 판단 -> id의 유무 (기본전략)
